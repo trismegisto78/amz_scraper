@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Converti Markdown - Amazon Books Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-item {
+            flex: 1;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .nav-item:last-child .nav-link {
+            border-right: none;
+        }
+
+        .nav-link:hover {
+            background: #f7fafc;
+            color: #667eea;
+        }
+
+        .nav-link.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .converter-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .upload-zone {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: #5a67d8;
+            background: #f0f4ff;
+        }
+
+        .upload-zone.dragover {
+            border-color: #4c51bf;
+            background: #e6fffa;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #4a5568;
+        }
+
+        .upload-subtext {
+            color: #718096;
+            font-size: 0.9em;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .selected-file {
+            background: #e6fffa;
+            border: 2px solid #38b2ac;
+            border-radius: 10px;
+            padding: 15px;
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-details {
+            display: flex;
+            align-items: center;
+        }
+
+        .file-icon {
+            font-size: 2em;
+            margin-right: 10px;
+            color: #38b2ac;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .file-size {
+            color: #718096;
+            font-size: 0.9em;
+            margin-top: 2px;
+        }
+
+        .remove-file {
+            background: #fed7d7;
+            color: #c53030;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .convert-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .convert-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .convert-button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .info-title {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-title::before {
+            content: "ℹ️";
+            margin-right: 10px;
+        }
+
+        .supported-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .feature-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .upload-zone {
+                padding: 20px;
+            }
+            
+            .supported-features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">📚 Gestione Libri</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/markdown-converter" class="nav-link active">📝 Converti Markdown</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="header">
+            <h1>📝 Convertitore Markdown</h1>
+            <p>Trasforma i tuoi file Markdown in documenti Word (.docx) con formattazione completa</p>
+        </div>
+
+        <div class="converter-card">
+            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📄</div>
+                <div class="upload-text">Clicca qui o trascina il tuo file Markdown</div>
+                <div class="upload-subtext">Supporta file .md e .markdown (max 10MB)</div>
+            </div>
+
+            <input type="file" id="fileInput" class="file-input" accept=".md,.markdown,text/markdown,text/plain">
+
+            <div id="selectedFile" class="selected-file">
+                <div class="file-info">
+                    <div class="file-details">
+                        <div class="file-icon">📋</div>
+                        <div>
+                            <div class="file-name" id="fileName"></div>
+                            <div class="file-size" id="fileSize"></div>
+                        </div>
+                    </div>
+                    <button class="remove-file" onclick="removeFile()">&times;</button>
+                </div>
+            </div>
+
+            <button id="convertButton" class="convert-button" onclick="convertFile()">
+                🔄 Converti in DOCX
+            </button>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Conversione in corso...</p>
+            </div>
+
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+        </div>
+
+        <div class="info-section">
+            <h3 class="info-title">Funzionalità Supportate</h3>
+            <p>Il convertitore supporta le seguenti funzionalità Markdown:</p>
+            
+            <div class="supported-features">
+                <div class="feature">
+                    <span class="feature-icon">📋</span>
+                    <span>Heading H1-H6</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">📝</span>
+                    <span>Paragrafi</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">💪</span>
+                    <span>Testo in grassetto</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">💫</span>
+                    <span>Testo in corsivo</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">📋</span>
+                    <span>Liste puntate</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">🔢</span>
+                    <span>Liste numerate</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">💻</span>
+                    <span>Blocchi di codice</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">💬</span>
+                    <span>Citazioni</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">➖</span>
+                    <span>Separatori orizzontali</span>
+                </div>
+                <div class="feature">
+                    <span class="feature-icon">⌨️</span>
+                    <span>Codice inline</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+
+        // Gestione upload
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+        // Drag & Drop
+        const uploadZone = document.querySelector('.upload-zone');
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            // Verifica tipo file
+            if (!file.name.match(/\.(md|markdown)$/i) && file.type !== 'text/markdown') {
+                showError('Per favore seleziona un file Markdown (.md o .markdown)');
+                return;
+            }
+
+            // Verifica dimensione (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showError('Il file è troppo grande. Dimensione massima: 10MB');
+                return;
+            }
+
+            selectedFile = file;
+            showSelectedFile(file);
+            hideMessages();
+        }
+
+        function showSelectedFile(file) {
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('selectedFile').style.display = 'block';
+            document.getElementById('convertButton').style.display = 'block';
+        }
+
+        function removeFile() {
+            selectedFile = null;
+            document.getElementById('selectedFile').style.display = 'none';
+            document.getElementById('convertButton').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            hideMessages();
+        }
+
+        async function convertFile() {
+            if (!selectedFile) {
+                showError('Nessun file selezionato');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('markdownFile', selectedFile);
+
+            // Mostra loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('convertButton').disabled = true;
+            hideMessages();
+
+            try {
+                const response = await fetch('/api/convert-markdown', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    // Download del file convertito
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = selectedFile.name.replace(/\.(md|markdown)$/i, '.docx');
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                    showSuccess('File convertito e scaricato con successo! 🎉');
+                } else {
+                    const error = await response.json();
+                    showError(error.error || 'Errore durante la conversione');
+                }
+            } catch (error) {
+                console.error('Errore conversione:', error);
+                showError('Errore di connessione. Riprova più tardi.');
+            } finally {
+                // Nascondi loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('convertButton').disabled = false;
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Books Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-item {
+            flex: 1;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .nav-item:last-child .nav-link {
+            border-right: none;
+        }
+
+        .nav-link:hover {
+            background: #f7fafc;
+            color: #667eea;
+        }
+
+        .nav-link.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .filters {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .filters h3 {
+            margin-bottom: 20px;
+            color: #667eea;
+            font-size: 1.3em;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group input:focus, .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .book-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #f8f9fa;
+        }
+
+        .book-content {
+            padding: 20px;
+        }
+
+        .book-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2d3748;
+            line-height: 1.4;
+        }
+
+        .book-author {
+            color: #666;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .book-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .metric-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .net-gain {
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .gain-positive {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .gain-negative {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .gain-zero {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .book-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.9em;
+            flex: 1;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .btn-info {
+            background: #3182ce;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #2c5282;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            background: white;
+            border-radius: 15px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .pagination button {
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .pagination button:hover {
+            background: #f7fafc;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 90%;
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .description {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .books-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="nav-link active">📚 Gestione Libri</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/markdown-converter" class="nav-link">📝 Converti Markdown</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="header">
+            <h1>📚 Amazon Books Manager</h1>
+            <p>Gestisci e analizza i tuoi libri Amazon</p>
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalBooks">-</div>
+                    <div>Libri Totali</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgRoyalties">-</div>
+                    <div>Royalties Medie</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="visibleBooks">-</div>
+                    <div>Libri Visualizzati</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <h3>🔍 Filtri di Ricerca</h3>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label>Parole chiave nel titolo</label>
+                    <input type="text" id="titleKeyword" placeholder="Cerca nel titolo...">
+                </div>
+                <div class="filter-group">
+                    <label>NET Gain minimo (€)</label>
+                    <input type="number" id="minNetGain" step="0.01" placeholder="0.00">
+                </div>
+                <div class="filter-group">
+                    <label>NET Gain massimo (€)</label>
+                    <input type="number" id="maxNetGain" step="0.01" placeholder="1000.00">
+                </div>
+                <div class="filter-group">
+                    <label>BSR minimo</label>
+                    <input type="number" id="minBsr" placeholder="1">
+                </div>
+                <div class="filter-group">
+                    <label>BSR massimo</label>
+                    <input type="number" id="maxBsr" placeholder="1000000">
+                </div>
+                <div class="filter-group">
+                    <label>Editore</label>
+                    <input type="text" id="publisher" placeholder="Nome editore...">
+                </div>
+                <div class="filter-group">
+                    <label>Ordina per</label>
+                    <select id="sortBy">
+                        <option value="monthly_net_gain">NET Gain</option>
+                        <option value="bsr">BSR</option>
+                        <option value="ratings">Recensioni</option>
+                        <option value="royalties">Royalties</option>
+                        <option value="title">Titolo</option>
+                        <option value="created_at">Data creazione</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Ordine</label>
+                    <select id="sortOrder">
+                        <option value="DESC">Decrescente</option>
+                        <option value="ASC">Crescente</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-secondary" onclick="clearFilters()">🗑️ Pulisci Filtri</button>
+                <button class="btn btn-primary" onclick="applyFilters()">🔍 Applica Filtri</button>
+            </div>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Caricamento libri...</p>
+        </div>
+
+        <div id="books-container" class="books-grid"></div>
+
+        <div id="no-results" class="no-results" style="display: none;">
+            <h3>📭 Nessun libro trovato</h3>
+            <p>Prova a modificare i filtri di ricerca</p>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- Modal per dettagli libro -->
+    <div id="bookModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 0;
+        let currentFilters = {};
+        const booksPerPage = 20;
+
+        // Carica statistiche iniziali
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                document.getElementById('totalBooks').textContent = stats.total?.count || 0;
+                document.getElementById('avgRoyalties').textContent = 
+                    stats.avgRoyalties?.avg_royalties ? 
+                    '€' + parseFloat(stats.avgRoyalties.avg_royalties).toFixed(2) : '€0.00';
+            } catch (error) {
+                console.error('Errore caricamento statistiche:', error);
+            }
+        }
+
+        // Carica libri con filtri
+        async function loadBooks(page = 0, filters = {}) {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('books-container').style.display = 'none';
+            document.getElementById('no-results').style.display = 'none';
+
+            try {
+                const params = new URLSearchParams({
+                    limit: booksPerPage,
+                    offset: page * booksPerPage,
+                    ...filters
+                });
+
+                const response = await fetch(`/api/books?${params}`);
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('visibleBooks').textContent = data.total || 0;
+
+                if (data.books && data.books.length > 0) {
+                    renderBooks(data.books);
+                    renderPagination(page, data.total);
+                    document.getElementById('books-container').style.display = 'grid';
+                } else {
+                    document.getElementById('no-results').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                console.error('Errore caricamento libri:', error);
+                alert('Errore durante il caricamento dei libri');
+            }
+        }
+
+        // Renderizza libri
+        function renderBooks(books) {
+            const container = document.getElementById('books-container');
+            container.innerHTML = books.map(book => `
+                <div class="book-card">
+                    <img class="book-image" 
+                         src="${book.image_src || book.large_image || '/placeholder-book.jpg'}" 
+                         alt="${book.title || 'Copertina libro'}"
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjhGOUZBIi8+CjxwYXRoIGQ9Ik02MCA2MEgxNDBWMTQwSDYwVjYwWiIgZmlsbD0iI0U5RUNFRiIvPgo8cGF0aCBkPSJNODAgMTAwSDEyMFYxMjBIODBWMTAwWiIgZmlsbD0iI0Q2RDlEQyIvPgo8L3N2Zz4K'">
+                    
+                    <div class="book-content">
+                        <div class="book-title">${book.title || 'Titolo non disponibile'}</div>
+                        <div class="book-author">${book.author || 'Autore sconosciuto'}</div>
+                        
+                        <div class="net-gain ${getGainClass(book.monthly_net_gain)}">
+                            NET: €${parseFloat(book.monthly_net_gain || 0).toFixed(2)}/mese
+                        </div>
+                        
+                        <div class="book-metrics">
+                            <div class="metric">
+                                <div class="metric-label">BSR</div>
+                                <div class="metric-value">${formatNumber(book.bsr) || 'N/A'}</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Recensioni</div>
+                                <div class="metric-value">${formatNumber(book.ratings) || '0'}</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Rating</div>
+                                <div class="metric-value">${book.rating_avg || 'N/A'}</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-label">Royalties</div>
+                                <div class="metric-value">€${parseFloat(book.royalties || 0).toFixed(2)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="book-actions">
+                            <button class="btn btn-info btn-small" onclick="showBookDetails('${book.asin}')">
+                                📖 Dettagli
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteBook('${book.asin}', '${book.title?.replace(/'/g, "\\'")}')">
+                                🗑️ Elimina
+                            </button>
+                            ${book.url ? `<a href="${book.url}" target="_blank" class="btn btn-secondary btn-small" style="text-decoration: none; text-align: center;">🔗 Amazon</a>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Renderizza paginazione
+        function renderPagination(currentPage, totalItems) {
+            const totalPages = Math.ceil(totalItems / booksPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            
+            // Bottone precedente
+            if (currentPage > 0) {
+                html += `<button onclick="changePage(${currentPage - 1})">« Precedente</button>`;
+            }
+            
+            // Pagine numerate
+            const startPage = Math.max(0, currentPage - 2);
+            const endPage = Math.min(totalPages - 1, currentPage + 2);
+            
+            if (startPage > 0) {
+                html += `<button onclick="changePage(0)">1</button>`;
+                if (startPage > 1) html += '<span>...</span>';
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ''}>${i + 1}</button>`;
+            }
+            
+            if (endPage < totalPages - 1) {
+                if (endPage < totalPages - 2) html += '<span>...</span>';
+                html += `<button onclick="changePage(${totalPages - 1})">${totalPages}</button>`;
+            }
+            
+            // Bottone successivo
+            if (currentPage < totalPages - 1) {
+                html += `<button onclick="changePage(${currentPage + 1})">Successivo »</button>`;
+            }
+            
+            pagination.innerHTML = html;
+        }
+
+        // Cambia pagina
+        function changePage(page) {
+            currentPage = page;
+            loadBooks(currentPage, currentFilters);
+        }
+
+        // Applica filtri
+        function applyFilters() {
+            const filters = {};
+            
+            const titleKeyword = document.getElementById('titleKeyword').value.trim();
+            if (titleKeyword) filters.titleKeyword = titleKeyword;
+            
+            const minNetGain = document.getElementById('minNetGain').value;
+            if (minNetGain) filters.minNetGain = minNetGain;
+            
+            const maxNetGain = document.getElementById('maxNetGain').value;
+            if (maxNetGain) filters.maxNetGain = maxNetGain;
+            
+            const minBsr = document.getElementById('minBsr').value;
+            if (minBsr) filters.minBsr = minBsr;
+            
+            const maxBsr = document.getElementById('maxBsr').value;
+            if (maxBsr) filters.maxBsr = maxBsr;
+            
+            const publisher = document.getElementById('publisher').value.trim();
+            if (publisher) filters.publisher = publisher;
+            
+            filters.sortBy = document.getElementById('sortBy').value;
+            filters.sortOrder = document.getElementById('sortOrder').value;
+            
+            currentFilters = filters;
+            currentPage = 0;
+            loadBooks(currentPage, currentFilters);
+        }
+
+        // Pulisci filtri
+        function clearFilters() {
+            document.getElementById('titleKeyword').value = '';
+            document.getElementById('minNetGain').value = '';
+            document.getElementById('maxNetGain').value = '';
+            document.getElementById('minBsr').value = '';
+            document.getElementById('maxBsr').value = '';
+            document.getElementById('publisher').value = '';
+            document.getElementById('sortBy').value = 'monthly_net_gain';
+            document.getElementById('sortOrder').value = 'DESC';
+            
+            currentFilters = {};
+            currentPage = 0;
+            loadBooks(currentPage, currentFilters);
+        }
+
+        // Mostra dettagli libro
+        async function showBookDetails(asin) {
+            try {
+                const response = await fetch(`/api/books/${asin}`);
+                const book = await response.json();
+                
+                const modalContent = document.getElementById('modalContent');
+                modalContent.innerHTML = `
+                    <h3>📚 ${book.title || 'Titolo non disponibile'}</h3>
+                    
+                    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                        <img src="${book.image_src || book.large_image || '/placeholder-book.jpg'}" 
+                             alt="Copertina" 
+                             style="width: 150px; height: 200px; object-fit: cover; border-radius: 8px;"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDE1MCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjhGOUZBIi8+CjxwYXRoIGQ9Ik00MCA2MEgxMTBWMTQwSDQwVjYwWiIgZmlsbD0iI0U5RUNFRiIvPgo8cGF0aCBkPSJNNjAgMTAwSDkwVjEyMEg2MFYxMDBaIiBmaWxsPSIjRDZEOURDIi8+Cjwvc3ZnPgo='">
+                        
+                        <div style="flex: 1;">
+                            <p><strong>Autore:</strong> ${book.author || 'Non specificato'}</p>
+                            <p><strong>ASIN:</strong> ${book.asin}</p>
+                            <p><strong>Editore:</strong> ${book.publisher || 'Non specificato'}</p>
+                            <p><strong>Tipo:</strong> ${book.type || 'Non specificato'}</p>
+                            <p><strong>Prezzo:</strong> ${book.price || 'Non disponibile'}</p>
+                            <p><strong>Best Seller:</strong> ${book.is_best_seller === 'True' ? '✅ Sì' : '❌ No'}</p>
+                            <p><strong>Sponsorizzato:</strong> ${book.is_sponsored === 'True' ? '✅ Sì' : '❌ No'}</p>
+                        </div>
+                    </div>
+                    
+                    ${book.description ? `
+                        <div class="description">
+                            <h4>📝 Descrizione</h4>
+                            <p>${book.description}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span>BSR:</span>
+                            <strong>${formatNumber(book.bsr) || 'N/A'}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Recensioni:</span>
+                            <strong>${formatNumber(book.ratings) || '0'}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Rating medio:</span>
+                            <strong>${book.rating_avg || 'N/A'}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Pagine:</span>
+                            <strong>${book.pages_num || 'N/A'}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Dimensioni:</span>
+                            <strong>${book.dimensions || 'N/A'}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Costo stampa:</span>
+                            <strong>€${parseFloat(book.print_cost || 0).toFixed(2)}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Vendite mensili:</span>
+                            <strong>${formatNumber(book.monthly_sales) || '0'}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Royalties:</span>
+                            <strong>€${parseFloat(book.royalties || 0).toFixed(2)}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Guadagno mensile:</span>
+                            <strong>€${parseFloat(book.monthly_gain || 0).toFixed(2)}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>NET Gain mensile:</span>
+                            <strong style="color: ${getGainColor(book.monthly_net_gain)}">
+                                €${parseFloat(book.monthly_net_gain || 0).toFixed(2)}
+                            </strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>A colori:</span>
+                            <strong>${book.is_color === 'True' ? '🎨 Sì' : '⚫ No'}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Aggiunto il:</span>
+                            <strong>${new Date(book.created_at).toLocaleDateString('it-IT')}</strong>
+                        </div>
+                    </div>
+                    
+                    ${book.url ? `
+                        <div style="margin-top: 20px; text-align: center;">
+                            <a href="${book.url}" target="_blank" class="btn btn-primary">
+                                🔗 Visualizza su Amazon
+                            </a>
+                        </div>
+                    ` : ''}
+                `;
+                
+                document.getElementById('bookModal').style.display = 'block';
+            } catch (error) {
+                console.error('Errore caricamento dettagli:', error);
+                alert('Errore durante il caricamento dei dettagli del libro');
+            }
+        }
+
+        // Chiudi modal
+        function closeModal() {
+            document.getElementById('bookModal').style.display = 'none';
+        }
+
+        // Elimina libro
+        async function deleteBook(asin, title) {
+            if (!confirm(`Sei sicuro di voler eliminare il libro "${title}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/books/${asin}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('Libro eliminato con successo');
+                    loadBooks(currentPage, currentFilters);
+                    loadStats();
+                } else {
+                    throw new Error('Errore durante l\'eliminazione');
+                }
+            } catch (error) {
+                console.error('Errore eliminazione libro:', error);
+                alert('Errore durante l\'eliminazione del libro');
+            }
+        }
+
+        // Utility functions
+        function getGainClass(netGain) {
+            const gain = parseFloat(netGain || 0);
+            if (gain > 0) return 'gain-positive';
+            if (gain < 0) return 'gain-negative';
+            return 'gain-zero';
+        }
+
+        function getGainColor(netGain) {
+            const gain = parseFloat(netGain || 0);
+            if (gain > 0) return '#22543d';
+            if (gain < 0) return '#742a2a';
+            return '#4a5568';
+        }
+
+        function formatNumber(num) {
+            if (!num) return null;
+            return new Intl.NumberFormat('it-IT').format(num);
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            loadBooks();
+            
+            // Enter per applicare filtri
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    applyFilters();
+                }
+            });
+            
+            // Chiudi modal cliccando fuori
+            document.getElementById('bookModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
