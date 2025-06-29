@@ -332,7 +332,7 @@ Il convertitore gestisce questi elementi Markdown:
 | **Corsivo** | `*testo*` | Testo in italics |
 | **Codice inline** | `` `codice` `` | Font Courier New |
 | **Blocchi codice** | ```` ```codice``` ```` | Paragrafo monospaziato |
-| **Liste puntate** | `- item` | Liste con bullet |
+| **Liste puntate** | `- item` | Liste con bullet (supporto grassetto/corsivo) |
 | **Liste numerate** | `1. item` | Liste numerate |
 | **Citazioni** | `> citazione` | Paragrafo indentato e corsivo |
 | **Separatori** | `---` | Linea orizzontale |

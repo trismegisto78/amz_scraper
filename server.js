@@ -181,9 +181,13 @@ function markdownToDocx(markdownText) {
       case 'list':
         token.items.forEach((item, index) => {
           const listText = item.text.replace(/<[^>]*>/g, ''); // Rimuovi tag HTML
+          const children = [
+            new TextRun(token.ordered ? `${index + 1}. ` : '• ')
+          ];
+          parseInlineFormatting(listText, children);
           paragraphs.push(
             new Paragraph({
-              text: `${token.ordered ? `${index + 1}. ` : '• '}${listText}`,
+              children,
               indent: { left: 360 }, // Indentazione lista
             })
           );
