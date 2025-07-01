@@ -21,7 +21,7 @@
 
 ### Caratteristiche Principali
 - 💾 **Database SQLite** per storage persistente
-- 🔍 **Sistema di filtri avanzati** (BSR, NET gain, parole chiave)
+- 🔍 **Sistema di filtri avanzati** (BSR, NET gain, recensioni, parole chiave)
 - 📊 **Dashboard con statistiche** in tempo reale
 - 🖼️ **Visualizzazione immagini** delle copertine
 - 📱 **Interfaccia responsive** desktop/mobile
@@ -188,6 +188,8 @@ Recupera libri con filtri e paginazione.
 &maxNetGain=200
 &minBsr=1000
 &maxBsr=10000
+&minRatings=10
+&maxRatings=500
 &publisher=penguin
 &sortBy=monthly_net_gain
 &sortOrder=DESC
@@ -262,6 +264,7 @@ Dashboard completa con:
 - 🔍 **Parole chiave nel titolo**
 - 💰 **NET Gain min/max**
 - 📊 **BSR min/max**
+- 📝 **Recensioni min/max**
 - 🏢 **Editore**
 - 📋 **Ordinamento** (campo + direzione)
 

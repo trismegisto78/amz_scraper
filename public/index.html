@@ -488,6 +488,14 @@
                     <input type="number" id="maxBsr" placeholder="1000000">
                 </div>
                 <div class="filter-group">
+                    <label>Recensioni minime</label>
+                    <input type="number" id="minRatings" placeholder="0">
+                </div>
+                <div class="filter-group">
+                    <label>Recensioni massime</label>
+                    <input type="number" id="maxRatings" placeholder="1000">
+                </div>
+                <div class="filter-group">
                     <label>Editore</label>
                     <input type="text" id="publisher" placeholder="Nome editore...">
                 </div>
@@ -710,7 +718,13 @@
             
             const maxBsr = document.getElementById('maxBsr').value;
             if (maxBsr) filters.maxBsr = maxBsr;
-            
+
+            const minRatings = document.getElementById('minRatings').value;
+            if (minRatings) filters.minRatings = minRatings;
+
+            const maxRatings = document.getElementById('maxRatings').value;
+            if (maxRatings) filters.maxRatings = maxRatings;
+
             const publisher = document.getElementById('publisher').value.trim();
             if (publisher) filters.publisher = publisher;
             
@@ -729,6 +743,8 @@
             document.getElementById('maxNetGain').value = '';
             document.getElementById('minBsr').value = '';
             document.getElementById('maxBsr').value = '';
+            document.getElementById('minRatings').value = '';
+            document.getElementById('maxRatings').value = '';
             document.getElementById('publisher').value = '';
             document.getElementById('sortBy').value = 'monthly_net_gain';
             document.getElementById('sortOrder').value = 'DESC';
