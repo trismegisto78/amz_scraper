@@ -389,16 +389,18 @@ app.post('/api/convert-markdown', upload.single('markdownFile'), async (req, res
 
 // GET /api/books - Recupera tutti i libri con filtri opzionali
 app.get('/api/books', (req, res) => {
-  const { 
-    publisher, 
-    minRoyalties, 
-    maxBsr, 
+  const {
+    publisher,
+    minRoyalties,
+    maxBsr,
     minBsr,
     minNetGain,
     maxNetGain,
+    minRatings,
+    maxRatings,
     titleKeyword,
-    type, 
-    limit = 100, 
+    type,
+    limit = 100,
     offset = 0,
     sortBy = 'monthly_net_gain',
     sortOrder = 'DESC'
@@ -435,6 +437,16 @@ app.get('/api/books', (req, res) => {
   if (maxNetGain) {
     query += ' AND monthly_net_gain <= ?';
     params.push(parseFloat(maxNetGain));
+  }
+
+  if (minRatings) {
+    query += ' AND ratings >= ?';
+    params.push(parseInt(minRatings));
+  }
+
+  if (maxRatings) {
+    query += ' AND ratings <= ?';
+    params.push(parseInt(maxRatings));
   }
 
   if (titleKeyword) {
