@@ -222,7 +222,22 @@ Recupera un libro specifico.
 }
 ```
 
-### 4. **DELETE /api/books/:asin** - Elimina Libro
+### 4. **PUT /api/books/:asin/update** - Aggiorna Libro
+Recupera le informazioni correnti da Amazon e aggiorna il record nel database.
+
+**Response:**
+```json
+{
+  "asin": "B08XYZ123",
+  "bsr": 1200,
+  "ratings": 500,
+  "price": "$9.99",
+  "is_color": "True",
+  ...
+}
+```
+
+### 5. **DELETE /api/books/:asin** - Elimina Libro
 Rimuove un libro dal database.
 
 **Response:**
@@ -232,7 +247,7 @@ Rimuove un libro dal database.
 }
 ```
 
-### 5. **GET /api/stats** - Statistiche
+### 6. **GET /api/stats** - Statistiche
 Statistiche generali del database.
 
 **Response:**

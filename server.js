@@ -358,6 +358,30 @@ function parseInlineFormatting(text, children) {
   }
 }
 
+// Recupera dati aggiornati da Amazon (placeholder)
+async function fetchBookInfoFromAmazon(asin) {
+  const url = `https://www.amazon.it/dp/${asin}`;
+  try {
+    const res = await fetch(url);
+    const html = await res.text();
+
+    const bsrMatch = html.match(/#([\d,.]+)\s*in/i);
+    const ratingsMatch = html.match(/>([\d,.]+)\s*recensioni/i);
+    const priceMatch = html.match(/priceblock_ourprice[^>]*>([^<]+)/i);
+
+    const bsr = bsrMatch ? parseInt(bsrMatch[1].replace(/[.,]/g, '')) : 0;
+    const ratings = ratingsMatch ? parseInt(ratingsMatch[1].replace(/[.,]/g, '')) : 0;
+    const price = priceMatch ? priceMatch[1].trim() : null;
+
+    const isColor = /color/i.test(html) ? 'True' : 'False';
+
+    return { bsr, ratings, price, is_color: isColor };
+  } catch (err) {
+    console.error('Errore fetch Amazon:', err);
+    return null;
+  }
+}
+
 // POST /api/convert-markdown - Converte file Markdown in DOCX
 app.post('/api/convert-markdown', upload.single('markdownFile'), async (req, res) => {
   try {
@@ -528,6 +552,37 @@ app.get('/api/books/:asin', (req, res) => {
   });
 });
 
+// PUT /api/books/:asin/update - Aggiorna dati del libro
+app.put('/api/books/:asin/update', async (req, res) => {
+  const asin = req.params.asin;
+
+  try {
+    const info = await fetchBookInfoFromAmazon(asin);
+    if (!info) {
+      return res.status(500).json({ error: 'Impossibile recuperare dati da Amazon' });
+    }
+
+    const updateQuery = `UPDATE books SET bsr = ?, ratings = ?, price = ?, is_color = ?, updated_at = CURRENT_TIMESTAMP WHERE asin = ?`;
+    const params = [info.bsr || 0, info.ratings || 0, info.price, info.is_color, asin];
+
+    db.run(updateQuery, params, function(err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+
+      db.get('SELECT * FROM books WHERE asin = ?', [asin], (err, row) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        res.json(row);
+      });
+    });
+  } catch (error) {
+    console.error('Errore aggiornamento libro:', error);
+    res.status(500).json({ error: 'Errore aggiornamento libro' });
+  }
+});
+
 // DELETE /api/books/:asin - Elimina un libro
 app.delete('/api/books/:asin', (req, res) => {
   const asin = req.params.asin;
@@ -587,6 +642,7 @@ app.listen(PORT, () => {
   console.log('  POST   /api/books       - Salva libri');
   console.log('  GET    /api/books       - Lista libri (con filtri)');
   console.log('  GET    /api/books/:asin - Dettaglio libro');
+  console.log('  PUT    /api/books/:asin/update - Aggiorna dati libro');
   console.log('  DELETE /api/books/:asin - Elimina libro');
   console.log('  GET    /api/stats       - Statistiche');
 });
