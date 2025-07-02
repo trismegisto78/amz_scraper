@@ -95,6 +95,9 @@ app.post('/api/books', (req, res) => {
 
   books.forEach((book, index) => {
     try {
+      const isColor = typeof (book.isColor ?? book.is_color) === 'boolean'
+        ? ((book.isColor ?? book.is_color) ? 'True' : 'False')
+        : (book.isColor ?? book.is_color);
       stmt.run([
         book.asin,
         book.title,
@@ -116,7 +119,7 @@ app.post('/api/books', (req, res) => {
         book.dimensions,
         book.printCost || 0,
         book.description,
-        book.isColor,
+        isColor,
         book.royalties || 0,
         book.monthlyGain || 0,
         book.monthlyNETGain || 0
