@@ -104,6 +104,8 @@ app.post('/api/books', (req, res) => {
       const monthlySales = isBsrMissing ? 0 : (book.monthlySales || 0);
       const monthlyGain = isBsrMissing ? 0 : (book.monthlyGain || 0);
       const netGain = isBsrMissing ? 0 : (book.monthlyNETGain || 0);
+      const ratings = parseInt(book.ratings);
+      const safeRatings = isNaN(ratings) || ratings < 0 ? 0 : ratings;
 
       stmt.run([
         book.asin,
@@ -117,7 +119,7 @@ app.post('/api/books', (req, res) => {
         book.price,
         book.priceStrike || 0,
         book.isBestSeller,
-        book.ratings || 0,
+        safeRatings,
         book.ratingAvg,
         book.publisher,
         bsr || 0,
