@@ -547,6 +547,15 @@
         </div>
     </div>
 
+    <!-- Modal per dati prompt -->
+    <div id="promptModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closePromptModal()">&times;</button>
+            <textarea id="promptText" style="width: 100%; height: 300px; margin-bottom: 10px;" readonly></textarea>
+            <button class="btn btn-primary btn-small" onclick="copyPrompt()">Copy</button>
+        </div>
+    </div>
+
     <script>
         let currentPage = 0;
         let currentFilters = {};
@@ -640,6 +649,9 @@
                         <div class="book-actions">
                             <button class="btn btn-info btn-small" onclick="showBookDetails('${book.asin}')">
                                 📖 Dettagli
+                            </button>
+                            <button class="btn btn-secondary btn-small" onclick="showPromptData('${book.asin}')">
+                                📋 Prompt
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteBook('${book.asin}', '${book.title?.replace(/'/g, "\\'")}')">
                                 🗑️ Elimina
@@ -841,13 +853,10 @@
                         </div>
                     </div>
                     
-                    ${book.url ? `
-                        <div style="margin-top: 20px; text-align: center;">
-                            <a href="${book.url}" target="_blank" class="btn btn-primary">
-                                🔗 Visualizza su Amazon
-                            </a>
-                        </div>
-                    ` : ''}
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button class="btn btn-secondary" onclick="showPromptData('${book.asin}')">📋 Prompt</button>
+                        ${book.url ? `<a href="${book.url}" target="_blank" class="btn btn-primary" style="margin-left: 10px;">🔗 Visualizza su Amazon</a>` : ''}
+                    </div>
                 `;
                 
                 document.getElementById('bookModal').style.display = 'block';
@@ -860,6 +869,28 @@
         // Chiudi modal
         function closeModal() {
             document.getElementById('bookModal').style.display = 'none';
+        }
+
+        // Mostra dati per prompt
+        async function showPromptData(asin) {
+            try {
+                const response = await fetch(`/api/books/${asin}`);
+                const book = await response.json();
+                document.getElementById('promptText').value = JSON.stringify(book, null, 2);
+                document.getElementById('promptModal').style.display = 'block';
+            } catch (error) {
+                console.error('Errore caricamento prompt:', error);
+                alert('Errore durante il caricamento dei dati');
+            }
+        }
+
+        function closePromptModal() {
+            document.getElementById('promptModal').style.display = 'none';
+        }
+
+        function copyPrompt() {
+            const text = document.getElementById('promptText').value;
+            navigator.clipboard.writeText(text);
         }
 
         // Elimina libro
@@ -922,6 +953,12 @@
             document.getElementById('bookModal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeModal();
+                }
+            });
+
+            document.getElementById('promptModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closePromptModal();
                 }
             });
         });
