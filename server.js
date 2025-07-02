@@ -360,12 +360,16 @@ function parseInlineFormatting(text, children) {
 
 // Recupera dati aggiornati da Amazon (placeholder)
 async function fetchBookInfoFromAmazon(asin) {
-  const url = `https://www.amazon.it/dp/${asin}`;
+  const url = `https://www.amazon.com/dp/${asin}`;
   try {
     const res = await fetch(url);
-    const html = await res.text();
+    
 
+    const html = await res.text();
+console.info('res '+html);
     const bsrMatch = html.match(/#([\d,.]+)\s*in/i);
+
+    console.info('bsrMatch '+bsrMatch);
     const ratingsMatch = html.match(/>([\d,.]+)\s*recensioni/i);
     const priceMatch = html.match(/priceblock_ourprice[^>]*>([^<]+)/i);
 
