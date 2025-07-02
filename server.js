@@ -98,6 +98,13 @@ app.post('/api/books', (req, res) => {
       const isColor = typeof (book.isColor ?? book.is_color) === 'boolean'
         ? ((book.isColor ?? book.is_color) ? 'True' : 'False')
         : (book.isColor ?? book.is_color);
+
+      const bsr = book.bsr;
+      const isBsrMissing = !bsr || bsr === 'N/A';
+      const monthlySales = isBsrMissing ? 0 : (book.monthlySales || 0);
+      const monthlyGain = isBsrMissing ? 0 : (book.monthlyGain || 0);
+      const netGain = isBsrMissing ? 0 : (book.monthlyNETGain || 0);
+
       stmt.run([
         book.asin,
         book.title,
@@ -113,16 +120,16 @@ app.post('/api/books', (req, res) => {
         book.ratings || 0,
         book.ratingAvg,
         book.publisher,
-        book.bsr || 0,
-        book.monthlySales || 0,
+        bsr || 0,
+        monthlySales,
         book.pagesnum || 0,
         book.dimensions,
         book.printCost || 0,
         book.description,
         isColor,
         book.royalties || 0,
-        book.monthlyGain || 0,
-        book.monthlyNETGain || 0
+        monthlyGain,
+        netGain
       ]);
       savedCount++;
     } catch (error) {
