@@ -653,6 +653,9 @@
                             <button class="btn btn-secondary btn-small" onclick="showPromptData('${book.asin}')">
                                 📋 Prompt
                             </button>
+                            <button class="btn btn-warning btn-small" onclick="updateBook('${book.asin}')">
+                                🔄 Update
+                            </button>
                             <button class="btn btn-danger btn-small" onclick="deleteBook('${book.asin}', '${book.title?.replace(/'/g, "\\'")}')">
                                 🗑️ Elimina
                             </button>
@@ -914,6 +917,26 @@
             } catch (error) {
                 console.error('Errore eliminazione libro:', error);
                 alert('Errore durante l\'eliminazione del libro');
+            }
+        }
+
+        // Aggiorna libro
+        async function updateBook(asin) {
+            try {
+                const response = await fetch(`/api/books/${asin}/update`, {
+                    method: 'PUT'
+                });
+
+                if (response.ok) {
+                    alert('Libro aggiornato');
+                    loadBooks(currentPage, currentFilters);
+                    loadStats();
+                } else {
+                    throw new Error('Errore durante l\'aggiornamento');
+                }
+            } catch (error) {
+                console.error('Errore aggiornamento libro:', error);
+                alert('Errore durante l\'aggiornamento del libro');
             }
         }
 
