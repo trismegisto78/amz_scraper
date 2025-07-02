@@ -4,6 +4,8 @@ const cors = require('cors');
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 // Per la conversione Markdown -> DOCX
 const { marked } = require('marked');
@@ -358,28 +360,50 @@ function parseInlineFormatting(text, children) {
   }
 }
 
-// Recupera dati aggiornati da Amazon (placeholder)
+// Converte stringhe come "1,234 ratings" in un intero
+function convertStringToRatings(str) {
+  if (!str) return 0;
+  const match = str.match(/([\d,.]+)/);
+  return match ? parseInt(match[1].replace(/[.,]/g, '')) : 0;
+}
+
+// Estrae il numero di classifica da stringhe tipo "Best Sellers Rank: #1,234"
+function extractRankNumber(str) {
+  if (!str) return 0;
+  const match = str.match(/#([\d,.]+)/);
+  return match ? parseInt(match[1].replace(/[.,]/g, '')) : 0;
+}
+
+
+// Recupera dati aggiornati da Amazon utilizzando axios e cheerio
 async function fetchBookInfoFromAmazon(asin) {
-  const url = `https://www.amazon.com/dp/${asin}`;
+  const url = `https://www.amazon.it/dp/${asin}`;
   try {
-    const res = await fetch(url);
-    
+    const { data: html } = await axios.get(url, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
+        'Accept-Language': 'it-IT,it;q=0.9'
+      }
+    });
 
-    const html = await res.text();
-console.info('res '+html);
-    const bsrMatch = html.match(/#([\d,.]+)\s*in/i);
+    const $ = cheerio.load(html);
 
-    console.info('bsrMatch '+bsrMatch);
-    const ratingsMatch = html.match(/>([\d,.]+)\s*recensioni/i);
-    const priceMatch = html.match(/priceblock_ourprice[^>]*>([^<]+)/i);
+    const bsrText = $('#detailBullets_feature_div li:contains("Best Sellers Rank")').text();
+    const ratingsText = $('#acrCustomerReviewText').text();
+    const priceText = $('#priceblock_ourprice').text() || $('#priceblock_dealprice').text();
+    const description = $('#productDescription').text();
 
-    const bsr = bsrMatch ? parseInt(bsrMatch[1].replace(/[.,]/g, '')) : 0;
-    const ratings = ratingsMatch ? parseInt(ratingsMatch[1].replace(/[.,]/g, '')) : 0;
-    const price = priceMatch ? priceMatch[1].trim() : null;
+    const bsr = extractRankNumber(bsrText);
+    const ratings = convertStringToRatings(ratingsText);
+    const price = priceText ? priceText.trim() : null;
 
-    const isColor = /color/i.test(html) ? 'True' : 'False';
+    let is_color = 'False';
+    if (/full\s*color|color/i.test(description)) {
+      is_color = 'True';
+    }
 
-    return { bsr, ratings, price, is_color: isColor };
+    return { bsr, ratings, price, is_color };
   } catch (err) {
     console.error('Errore fetch Amazon:', err);
     return null;
