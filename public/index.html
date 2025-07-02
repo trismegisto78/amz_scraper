@@ -933,7 +933,7 @@
         }
 
         function formatNumber(num) {
-            if (!num) return null;
+            if (num === null || num === undefined) return null;
             return new Intl.NumberFormat('it-IT').format(num);
         }
 
