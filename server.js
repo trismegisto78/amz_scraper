@@ -377,7 +377,7 @@ function extractRankNumber(str) {
 
 // Recupera dati aggiornati da Amazon utilizzando axios e cheerio
 async function fetchBookInfoFromAmazon(asin) {
-  const url = `https://www.amazon.it/dp/${asin}`;
+  const url = `https://www.amazon.com/dp/${asin}`;
   try {
     const { data: html } = await axios.get(url, {
       headers: {
